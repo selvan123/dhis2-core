@@ -35,6 +35,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseLinkableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
+import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.event.EventStatus;
 
 import java.util.ArrayList;
@@ -78,6 +79,8 @@ public class Event
     private List<DataValue> dataValues = new ArrayList<>();
 
     private List<Note> notes = new ArrayList<>();
+    
+    private List<TrackedEntityInstance> associates = new ArrayList<>();
 
     private Boolean followup;
 
@@ -294,6 +297,18 @@ public class Event
     public void setNotes( List<Note> notes )
     {
         this.notes = notes;
+    }    
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public List<TrackedEntityInstance> getAssociates()
+    {
+        return associates;
+    }
+
+    public void setAssociates( List<TrackedEntityInstance> associates )
+    {
+        this.associates = associates;
     }
 
     @JsonProperty

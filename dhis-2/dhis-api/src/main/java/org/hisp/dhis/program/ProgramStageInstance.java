@@ -33,6 +33,7 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityComment;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
 
@@ -83,6 +84,8 @@ public class ProgramStageInstance
     private String completedBy;
 
     private Date completedDate;
+    
+    private List<TrackedEntityInstance> associates = new ArrayList<>();
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -301,4 +304,14 @@ public class ProgramStageInstance
     {
         this.deleted = deleted;
     }
+
+    public List<TrackedEntityInstance> getAssociates()
+    {
+        return associates;
+    }
+
+    public void setAssociates( List<TrackedEntityInstance> associates )
+    {
+        this.associates = associates;
+    }    
 }
