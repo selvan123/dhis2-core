@@ -80,7 +80,7 @@ public class Event
 
     private List<Note> notes = new ArrayList<>();
     
-    private List<TrackedEntityInstance> associates = new ArrayList<>();
+    private List<String> associates = new ArrayList<>();
 
     private Boolean followup;
 
@@ -301,12 +301,12 @@ public class Event
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public List<TrackedEntityInstance> getAssociates()
+    public List<String> getAssociates()
     {
         return associates;
     }
 
-    public void setAssociates( List<TrackedEntityInstance> associates )
+    public void setAssociates( List<String> associates )
     {
         this.associates = associates;
     }
