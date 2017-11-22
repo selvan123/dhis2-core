@@ -174,6 +174,10 @@ public class TableAlteror
         executeSql( "update programstage set autoGenerateEvent=true where programid in ( select programid from program where type=2 )" );
 
         executeSql( "ALTER TABLE programstageinstance ALTER COLUMN executiondate TYPE timestamp" );
+        
+        executeSql( "ALTER TABLE programstageinstance_trackedentityinstances DROP CONSTRAINT programstageinstance_patients_pkey" );
+        executeSql( "ALTER TABLE programstageinstance_trackedentityinstances DROP CONSTRAINT fkb984e6be49cd44e2" );
+        executeSql( "ALTER TABLE programstageinstance_trackedentityinstances DROP CONSTRAINT fkb984e6bebaced27d" );
 
         executeSql( "ALTER TABLE program DROP COLUMN useBirthDateAsIncidentDate" );
         executeSql( "ALTER TABLE program DROP COLUMN useBirthDateAsEnrollmentDate" );

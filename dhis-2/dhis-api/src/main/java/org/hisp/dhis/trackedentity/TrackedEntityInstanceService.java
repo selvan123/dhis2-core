@@ -207,19 +207,28 @@ public interface TrackedEntityInstanceService
     /**
      * Returns a {@link TrackedEntityInstance}.
      *
-     * @param id the id of the TrackedEntityInstanceAttribute to return.
-     * @return the TrackedEntityInstanceAttribute with the given id
+     * @param id the id of the TrackedEntityInstance to return.
+     * @return the TrackedEntityInstance with the given id
      */
     TrackedEntityInstance getTrackedEntityInstance( int id );
 
     /**
-     * Returns the {@link TrackedEntityAttribute} with the given UID.
+     * Returns the {@link TrackedEntityInstance} with the given UID.
      *
      * @param uid the UID.
-     * @return the TrackedEntityInstanceAttribute with the given UID, or null if
+     * @return the TrackedEntityInstance with the given UID, or null if
      * no match.
      */
     TrackedEntityInstance getTrackedEntityInstance( String uid );
+     
+    /**
+     * Returns a list of tracked entity instances matching the given 
+     * collection of uids. 
+     *
+     * @param uids a collection of uids.
+     * @return List of tracked entity instances matching the uids
+     */
+    List<TrackedEntityInstance> getTrackedEntityInstances( Collection<String> uids );
 
     /**
      * Checks for the existence of a TEI by UID

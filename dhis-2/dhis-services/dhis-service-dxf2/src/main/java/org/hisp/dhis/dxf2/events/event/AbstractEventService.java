@@ -461,6 +461,13 @@ public abstract class AbstractEventService
                 }
             }
         }
+        
+        if( !event.getAssociates().isEmpty() )
+        {   
+            Collection<String> associateIds = new HashSet<>();
+            event.getAssociates().forEach( ass -> associateIds.add( ass.getTrackedEntityInstance() ) );            
+            programStageInstance.setAssociates( entityInstanceService.getTrackedEntityInstances( associateIds ));            
+        }
 
         OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getIdSchemes(), event.getOrgUnit() );
 
@@ -781,6 +788,15 @@ public abstract class AbstractEventService
 
             event.getNotes().add( note );
         }
+        
+        List<TrackedEntityInstance> associates = programStageInstance.getAssociates();
+        
+        for( TrackedEntityInstance ass : associates )
+        {
+            org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance tei = new org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance();
+            tei.setTrackedEntityInstance( ass.getUid() );
+            event.getAssociates().add( tei );
+        }
 
         return event;
     }
@@ -1043,6 +1059,14 @@ public abstract class AbstractEventService
                     programStageInstance.setLongitude( null );
                 }
             }
+        }
+        
+        if( !event.getAssociates().isEmpty() )
+        {            
+            Collection<String> associateIds = new HashSet<>();
+            event.getAssociates().forEach( ass -> associateIds.add( ass.getTrackedEntityInstance() ) );            
+            programStageInstance.setAssociates( entityInstanceService.getTrackedEntityInstances( associateIds ));
+            
         }
 
         Program program = getProgram( importOptions.getIdSchemes().getProgramIdScheme(), event.getProgram() );

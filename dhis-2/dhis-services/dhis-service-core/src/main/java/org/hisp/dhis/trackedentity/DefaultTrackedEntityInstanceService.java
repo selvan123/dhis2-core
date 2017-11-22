@@ -625,12 +625,18 @@ public class DefaultTrackedEntityInstanceService
     public TrackedEntityInstance getTrackedEntityInstance( String uid )
     {
         return trackedEntityInstanceStore.getByUid( uid );
-    }
+    }    
 
     @Override
     public boolean trackedEntityInstanceExists( String uid )
     {
         return trackedEntityInstanceStore.exists( uid );
+    }
+
+    @Override
+    public List<TrackedEntityInstance> getTrackedEntityInstances( Collection<String> uids )
+    {
+        return trackedEntityInstanceStore.getByUid( uids );
     }
 
     @Override
