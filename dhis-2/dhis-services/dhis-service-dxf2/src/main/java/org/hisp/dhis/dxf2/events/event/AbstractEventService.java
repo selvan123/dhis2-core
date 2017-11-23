@@ -791,11 +791,14 @@ public abstract class AbstractEventService
         
         List<TrackedEntityInstance> associates = programStageInstance.getAssociates();
         
-        for( TrackedEntityInstance ass : associates )
+        for( TrackedEntityInstance associate : associates )
         {
-            org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance tei = new org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance();
-            tei.setTrackedEntityInstance( ass.getUid() );
-            event.getAssociates().add( tei );
+            if( !associate.isDeleted() )
+            {
+                org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance tei = new org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance();
+                tei.setTrackedEntityInstance( associate.getUid() );
+                event.getAssociates().add( tei );
+            }
         }
 
         return event;
