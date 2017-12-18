@@ -88,10 +88,10 @@ import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.program.ProgramType;
 import org.hisp.dhis.query.Order;
-import org.hisp.dhis.scheduling.JobId;
 import org.hisp.dhis.query.Query;
 import org.hisp.dhis.query.QueryService;
 import org.hisp.dhis.query.Restrictions;
+import org.hisp.dhis.scheduling.JobId;
 import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.notification.NotificationLevel;
@@ -426,14 +426,18 @@ public abstract class AbstractEventService
             String cacheKey = program.getUid() + "-" + ProgramStatus.ACTIVE;
             List<ProgramInstance> programInstances = getActiveProgramInstances( cacheKey, program );
 
-            if ( programInstances == null || programInstances.isEmpty() )
-            {
+            if ( programInstances.isEmpty() )
+            {            	
                 // Create PI if it doesn't exist (should only be one)
+            	
+            	String storedBy = event.getStoredBy() != null && event.getStoredBy().length() < 31 ? event.getStoredBy() : user.getUsername();            	            	
+            	
                 ProgramInstance pi = new ProgramInstance();
                 pi.setEnrollmentDate( new Date() );
                 pi.setIncidentDate( new Date() );
                 pi.setProgram( program );
                 pi.setStatus( ProgramStatus.ACTIVE );
+                pi.setStoredBy( storedBy );
 
                 programInstanceService.addProgramInstance( pi );
 
@@ -931,20 +935,40 @@ public abstract class AbstractEventService
     public ImportSummaries updateEvents( List<Event> events, boolean singleValue )
     {
         ImportSummaries importSummaries = new ImportSummaries();
-        int counter = 0;
 
         User user = currentUserService.getCurrentUser();
+        List<List<Event>> partitions = Lists.partition( events, FLUSH_FREQUENCY );
 
-        for ( Event event : events )
+        for ( List<Event> _events : partitions )
         {
-            importSummaries.addImportSummary( updateEvent( event, user, singleValue, null ) );
+            // prepare caches
+            Collection<String> orgUnits = _events.stream().map( Event::getOrgUnit ).collect( Collectors.toSet() );
 
-            if ( counter % FLUSH_FREQUENCY == 0 )
+            if ( !orgUnits.isEmpty() )
             {
-                clearSession();
+                Query query = Query.from( schemaService.getDynamicSchema( OrganisationUnit.class ) );
+                query.setUser( user );
+                query.add( Restrictions.in( "id", orgUnits ) );
+                queryService.query( query ).forEach( ou -> organisationUnitCache.put( ou.getUid(), (OrganisationUnit) ou ) );
             }
 
-            counter++;
+            Collection<String> dataElements = new HashSet<>();
+            events.forEach( e -> e.getDataValues().forEach( v -> dataElements.add( v.getDataElement() ) ) );
+
+            if ( !dataElements.isEmpty() )
+            {
+                Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
+                query.setUser( user );
+                query.add( Restrictions.in( "id", dataElements ) );
+                queryService.query( query ).forEach( de -> dataElementCache.put( de.getUid(), (DataElement) de ) );
+            }
+
+            for ( Event event : _events )
+            {
+                importSummaries.addImportSummary( updateEvent( event, user, singleValue, null ) );
+            }
+
+            clearSession();
         }
 
         return importSummaries;
@@ -1364,7 +1388,7 @@ public abstract class AbstractEventService
             if ( programStageInstance == null )
             {
                 programStageInstance = createProgramStageInstance( event, programStage, programInstance, organisationUnit,
-                    dueDate, executionDate, event.getStatus().getValue(), event.getCoordinate(), completedBy,
+                    dueDate, executionDate, event.getStatus().getValue(), event.getCoordinate(), completedBy, storedBy,
                     event.getEvent(), aoc, importOptions );
             }
             else
@@ -1481,7 +1505,7 @@ public abstract class AbstractEventService
 
     private ProgramStageInstance createProgramStageInstance( Event event, ProgramStage programStage, ProgramInstance programInstance,
         OrganisationUnit organisationUnit, Date dueDate, Date executionDate, int status, Coordinate coordinate,
-        String completedBy, String programStageInstanceIdentifier, DataElementCategoryOptionCombo aoc,
+        String completedBy, String storeBy, String programStageInstanceIdentifier, DataElementCategoryOptionCombo aoc,
         ImportOptions importOptions )
     {
         ProgramStageInstance programStageInstance = new ProgramStageInstance();
@@ -1495,6 +1519,8 @@ public abstract class AbstractEventService
             programStageInstance.setUid( CodeGenerator.generateUid() );
             programStageInstance.setCode( programStageInstanceIdentifier );
         }
+
+        programStageInstance.setStoredBy( storeBy );
 
         updateProgramStageInstance( event, programStage, programInstance, organisationUnit, dueDate, executionDate, status,
             coordinate, completedBy, programStageInstance, aoc, importOptions );
@@ -1658,8 +1684,7 @@ public abstract class AbstractEventService
     private List<ProgramInstance> getActiveProgramInstances( String key, Program program )
     {
         return activeProgramInstanceCache.get( key, () -> {
-            List<ProgramInstance> programInstances = programInstanceService.getProgramInstances( program, ProgramStatus.ACTIVE );
-            return programInstances.isEmpty() ? null : programInstances;
+            return programInstanceService.getProgramInstances( program, ProgramStatus.ACTIVE );
         } );
     }
 

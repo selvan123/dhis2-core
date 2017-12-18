@@ -31,7 +31,6 @@ package org.hisp.dhis.analytics.table;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.*;
-import org.hisp.dhis.analytics.partition.PartitionManager;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.commons.util.ConcurrentUtils;
 import org.hisp.dhis.commons.util.SystemUtils;
@@ -45,7 +44,11 @@ import org.hisp.dhis.system.notification.Notifier;
 import org.hisp.dhis.system.util.Clock;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
@@ -74,9 +77,6 @@ public class DefaultAnalyticsTableService
     private ResourceTableService resourceTableService;
     
     @Autowired
-    private PartitionManager partitionManager;
-    
-    @Autowired
     private Notifier notifier;
     
     @Autowired
@@ -100,13 +100,13 @@ public class DefaultAnalyticsTableService
         int processNo = getProcessNo();
         int orgUnitLevelNo = organisationUnitService.getNumberOfOrganisationalLevels();
         
-        String tableType = tableManager.getAnalyticsTableType().getTableName();
+        AnalyticsTableType tableType = tableManager.getAnalyticsTableType();
 
-        Date earliest = PartitionUtils.getEarliestDate( params.getLastYears() );
+        Date earliest = PartitionUtils.getStartDate( params.getLastYears() );
         
         Clock clock = new Clock( log )
             .startClock()
-            .logTime( String.format( "Starting update: %s, processes: %d, org unit levels: %d", tableType, processNo, orgUnitLevelNo ) );
+            .logTime( String.format( "Starting update: %s, processes: %d, org unit levels: %d", tableType.getTableName(), processNo, orgUnitLevelNo ) );
         
         String validState = tableManager.validState();
 
@@ -118,7 +118,7 @@ public class DefaultAnalyticsTableService
 
         final List<AnalyticsTable> tables = tableManager.getAnalyticsTables( earliest );
 
-        clock.logTime( "Table update start: " + tableType + ", earliest: " + earliest + ", parameters: " + params.toString() );
+        clock.logTime( "Table update start: " + tableType.getTableName() + ", earliest: " + earliest + ", parameters: " + params.toString() );
         notifier.notify( jobId, "Performing pre-create table work, org unit levels: " + orgUnitLevelNo );
 
         tableManager.preCreateTables();
@@ -139,6 +139,11 @@ public class DefaultAnalyticsTableService
         populateTables( tables );
         
         clock.logTime( "Populated analytics tables" );
+        notifier.notify( jobId, "Invoking analytics table hooks" );
+                
+        tableManager.invokeAnalyticsTableSqlHooks();
+        
+        clock.logTime( "Invoked analytics table hooks" );
         notifier.notify( jobId, "Applying aggregation levels" );
         
         applyAggregationLevels( tables );
@@ -158,12 +163,7 @@ public class DefaultAnalyticsTableService
         
         swapTables( tables, params.isSkipMasterTable() );
         
-        clock.logTime( "Swapped tables" );
-        notifier.notify( jobId, "Clearing caches" );
-
-        partitionManager.clearCaches();
-
-        clock.logTime( "Table update done: " + tableType );
+        clock.logTime( "Table update done: " + tableType.getTableName() );
         notifier.notify( jobId, "Table update done" );
     }
 

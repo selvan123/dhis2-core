@@ -36,6 +36,10 @@ import org.hisp.dhis.analytics.AnalyticsTable;
 import org.hisp.dhis.analytics.AnalyticsTableColumn;
 import org.hisp.dhis.analytics.AnalyticsTableManager;
 import org.hisp.dhis.analytics.AnalyticsTablePartition;
+import org.hisp.dhis.analytics.AnalyticsTablePhase;
+import org.hisp.dhis.analytics.AnalyticsTableHook;
+import org.hisp.dhis.analytics.AnalyticsTableHookService;
+import org.hisp.dhis.analytics.AnalyticsTableType;
 import org.hisp.dhis.analytics.partition.PartitionManager;
 import org.hisp.dhis.calendar.Calendar;
 import org.hisp.dhis.common.CodeGenerator;
@@ -48,7 +52,6 @@ import org.hisp.dhis.dataapproval.DataApprovalLevelService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.resourcetable.ResourceTableService;
 import org.hisp.dhis.setting.SettingKey;
@@ -97,10 +100,13 @@ public abstract class AbstractJdbcTableManager
     protected ResourceTableService resourceTableService;
     
     @Autowired
-    protected PartitionManager partitionManager;
-   
+    private AnalyticsTableHookService tableHookService;
+    
     @Autowired
     protected StatementBuilder statementBuilder;
+    
+    @Autowired
+    protected PartitionManager partitionManager;
     
     @Autowired
     protected DatabaseInfo databaseInfo;
@@ -219,7 +225,15 @@ public abstract class AbstractJdbcTableManager
 
         return null;
     }
-
+    
+    @Override
+    public void invokeAnalyticsTableSqlHooks()
+    {
+        AnalyticsTableType type = getAnalyticsTableType();        
+        List<AnalyticsTableHook> hooks = tableHookService.getByPhaseAndAnalyticsTableType( AnalyticsTablePhase.ANALYTICS_TABLE_POPULATED, type );
+        tableHookService.executeAnalyticsTableSqlHooks( hooks );
+    }
+    
     // -------------------------------------------------------------------------
     // Abstract methods
     // -------------------------------------------------------------------------
@@ -408,10 +422,8 @@ public abstract class AbstractJdbcTableManager
         AnalyticsTable table = new AnalyticsTable( baseName, dimensionColumns, valueColumns );
         
         for ( Integer year : dataYears )
-        {
-            Period period = PartitionUtils.getPeriod( calendar, year );
-            
-            table.addPartitionTable( year, period.getStartDate(), period.getEndDate() );
+        {            
+            table.addPartitionTable( year, PartitionUtils.getStartDate( calendar, year ), PartitionUtils.getEndDate( calendar, year ) );
         }
 
         return table;
