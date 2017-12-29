@@ -298,7 +298,7 @@ public class CompleteDataSetRegistrationController
             throw new WebMessageException( WebMessageUtils.conflict( "Illegal data set identifier: " + ds ) );
         }
 
-        Period period = PeriodType.getPeriodFromIsoString( pe );
+        Period period = periodService.getPeriod( pe );
 
         if ( period == null )
         {

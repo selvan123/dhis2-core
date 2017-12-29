@@ -461,6 +461,7 @@ public class TableAlteror
         executeSql( "update dataset set validcompleteonly = false where validcompleteonly is null" );
         executeSql( "update dataset set notifycompletinguser = false where notifycompletinguser is null" );
         executeSql( "update dataset set approvedata = false where approvedata is null" );
+        executeSql( "update dataset set compulsoryfieldscompleteonly = false where compulsoryfieldscompleteonly is null" );
         executeSql( "update dataelement set zeroissignificant = false where zeroissignificant is null" );
         executeSql( "update organisationunit set haspatients = false where haspatients is null" );
         executeSql( "update organisationunit set openingdate = '1970-01-01' where openingdate is null" );

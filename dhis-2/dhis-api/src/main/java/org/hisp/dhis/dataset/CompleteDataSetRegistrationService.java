@@ -1,5 +1,7 @@
 package org.hisp.dhis.dataset;
 
+import org.hisp.dhis.common.IllegalQueryException;
+
 /*
  * Copyright (c) 2004-2017, University of Oslo
  * All rights reserved.
@@ -132,4 +134,13 @@ public interface CompleteDataSetRegistrationService
      * @param unit the OrganisationUnit.
      */
     void deleteCompleteDataSetRegistrations( OrganisationUnit unit );
+   
+    /**
+     * Validates the data set to be completed has its compulsory fields filled
+     *    
+     * @param registration the CompleteDataSetRegistration to validate.
+     * @throws IllegalQueryException if compulsory fields are not filled
+     */
+    
+    void validateCompulsoryFileds( CompleteDataSetRegistration registration);
 }
