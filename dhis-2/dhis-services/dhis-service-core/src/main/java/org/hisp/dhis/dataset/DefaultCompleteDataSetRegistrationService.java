@@ -233,8 +233,6 @@ public class DefaultCompleteDataSetRegistrationService
             
             dataValues = dataValueService.getDataElementOperandValues( registration.getDataSet().getCompulsoryDataElementOperands(), periods, organisationUnits );
             
-            System.out.println( "In validation:  " + dataValues );
-            
             if( dataValues.isEmpty() )
             {
                 violation = "Compulsory data elements need to be filled before completing the data set.";
