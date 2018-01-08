@@ -30,25 +30,14 @@ package org.hisp.dhis.dataset;
 
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.notifications.DataSetNotificationService;
-import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.trackedentity.DefaultTrackedEntityInstanceService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.common.DimensionalItemObject;
-import org.hisp.dhis.common.IllegalQueryException;
-import org.hisp.dhis.common.Map4;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Lars Helge Overland
@@ -58,9 +47,6 @@ import java.util.Set;
 public class DefaultCompleteDataSetRegistrationService
     implements CompleteDataSetRegistrationService
 {
-    
-    private static final Log log = LogFactory.getLog( DefaultTrackedEntityInstanceService.class );
-    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -92,13 +78,6 @@ public class DefaultCompleteDataSetRegistrationService
     {
         this.dataSetNotificationService = dataSetNotificationService;
     }
-    
-    private DataValueService dataValueService;
-    
-    public void setDataValueService( DataValueService dataValueService )
-    {
-        this.dataValueService = dataValueService;
-    }
 
     // -------------------------------------------------------------------------
     // CompleteDataSetRegistrationService
@@ -111,18 +90,6 @@ public class DefaultCompleteDataSetRegistrationService
         {
             registration.setAttributeOptionCombo( categoryService.getDefaultDataElementCategoryOptionCombo() );
         }
-        
-        // ---------------------------------------------------------------------
-        // Check if compulsory data element operands are filled
-        // ---------------------------------------------------------------------
-        
-        if( registration.getDataSet().isCompulsoryFieldsCompleteOnly() )
-        {            
-            Set<OrganisationUnit> orgUnits = new HashSet<OrganisationUnit>();
-            orgUnits.add( registration.getSource() );
-            System.out.println( "calling validation" );
-            validateCompulsoryFileds( registration );
-        }        
 
         completeDataSetRegistrationStore.saveCompleteDataSetRegistration( registration );
     }
@@ -148,7 +115,6 @@ public class DefaultCompleteDataSetRegistrationService
     {
         for ( CompleteDataSetRegistration registration : registrations )
         {
-            System.out.println( "registration: " + registration );
             saveCompleteDataSetRegistration( registration, skipNotification );
         }
     }
@@ -205,59 +171,5 @@ public class DefaultCompleteDataSetRegistrationService
     public void deleteCompleteDataSetRegistrations( OrganisationUnit unit )
     {
         completeDataSetRegistrationStore.deleteCompleteDataSetRegistrations( unit );
-    }
-
-    @Override
-    public void validateCompulsoryFileds( CompleteDataSetRegistration registration ) throws IllegalQueryException
-    {
-        if( registration == null || 
-            registration.getDataSet() == null || 
-            registration.getPeriod() == null || 
-            registration.getSource() == null || 
-            registration.getAttributeOptionCombo() == null )
-        {
-            throw new IllegalQueryException( "Invalid CompleteDataSetRegistration parameter(s)." );            
-        }
-        
-        String violation = null;        
-        
-        if( !registration.getDataSet().getCompulsoryDataElementOperands().isEmpty() )
-        {
-            List<Period> periods = new ArrayList<>();        
-            periods.add( registration.getPeriod() );
-            
-            List<OrganisationUnit> organisationUnits = new ArrayList<>();        
-            organisationUnits.add( registration.getSource() );
-            
-            Map4<OrganisationUnit, Period, String, DimensionalItemObject, Double> dataValues = new Map4<>();
-            
-            dataValues = dataValueService.getDataElementOperandValues( registration.getDataSet().getCompulsoryDataElementOperands(), periods, organisationUnits );
-            
-            if( dataValues.isEmpty() )
-            {
-                violation = "Compulsory data elements need to be filled before completing the data set.";
-            }
-            else 
-            {
-                for( DataElementOperand dataElementOperand : registration.getDataSet().getCompulsoryDataElementOperands() )
-                {                                        
-                    if( dataValues.getValue( registration.getSource(), registration.getPeriod(), registration.getAttributeOptionCombo().getUid(), dataElementOperand ) == null )
-                    {
-                        violation = "Compulsory data elements need to be filled before completing the data set.";
-                        break;
-                    }
-                }
-                
-            }
-            
-        }        
-        
-        if ( violation != null )
-        {
-            log.warn( "Validation failed: " + violation );
-
-            throw new IllegalQueryException( violation );
-        }
-        
     }
 }
