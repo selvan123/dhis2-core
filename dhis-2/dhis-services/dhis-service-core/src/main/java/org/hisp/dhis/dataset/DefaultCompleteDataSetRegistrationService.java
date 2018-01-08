@@ -120,6 +120,7 @@ public class DefaultCompleteDataSetRegistrationService
         {            
             Set<OrganisationUnit> orgUnits = new HashSet<OrganisationUnit>();
             orgUnits.add( registration.getSource() );
+            System.out.println( "calling validation" );
             validateCompulsoryFileds( registration );
         }        
 
@@ -147,6 +148,7 @@ public class DefaultCompleteDataSetRegistrationService
     {
         for ( CompleteDataSetRegistration registration : registrations )
         {
+            System.out.println( "registration: " + registration );
             saveCompleteDataSetRegistration( registration, skipNotification );
         }
     }
