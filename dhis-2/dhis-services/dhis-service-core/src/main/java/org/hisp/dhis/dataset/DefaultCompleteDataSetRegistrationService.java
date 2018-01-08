@@ -36,7 +36,6 @@ import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.trackedentity.DefaultTrackedEntityInstanceService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.DimensionalItemObject;
@@ -59,7 +58,7 @@ public class DefaultCompleteDataSetRegistrationService
     implements CompleteDataSetRegistrationService
 {
     
-    private static final Log log = LogFactory.getLog( DefaultTrackedEntityInstanceService.class );
+    private static final Log log = LogFactory.getLog( DefaultCompleteDataSetRegistrationService.class );
     
     // -------------------------------------------------------------------------
     // Dependencies
