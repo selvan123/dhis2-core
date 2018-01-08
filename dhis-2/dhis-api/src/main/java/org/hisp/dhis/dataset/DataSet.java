@@ -885,10 +885,5 @@ public class DataSet
     public void setCompulsoryFieldsCompleteOnly( boolean compulsoryFieldsCompleteOnly )
     {
         this.compulsoryFieldsCompleteOnly = compulsoryFieldsCompleteOnly;
-<<<<<<< HEAD
     }
-    
-=======
-    }    
->>>>>>> master
 }
