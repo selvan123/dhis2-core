@@ -1,7 +1,5 @@
 package org.hisp.dhis.dataset;
 
-import org.hisp.dhis.common.IllegalQueryException;
-
 /*
  * Copyright (c) 2004-2018, University of Oslo
  * All rights reserved.
