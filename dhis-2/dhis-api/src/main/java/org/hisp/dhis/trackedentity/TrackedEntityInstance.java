@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.geolatte.geom.Geometry;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.organisationunit.FeatureType;
@@ -76,6 +77,8 @@ public class TrackedEntityInstance
     private FeatureType featureType = FeatureType.NONE;
 
     private String coordinates;
+
+    private Geometry geometry;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -254,5 +257,17 @@ public class TrackedEntityInstance
     public void setCoordinates( String coordinates )
     {
         this.coordinates = coordinates;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Geometry getGeometry()
+    {
+        return geometry;
+    }
+
+    public void setGeometry( Geometry geometry )
+    {
+        this.geometry = geometry;
     }
 }
