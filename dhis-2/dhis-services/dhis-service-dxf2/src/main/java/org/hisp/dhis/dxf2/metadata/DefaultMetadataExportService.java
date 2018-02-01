@@ -256,6 +256,12 @@ public class DefaultMetadataExportService implements MetadataExportService
             parameters.remove( "order" );
         }
 
+        if ( parameters.containsKey( "skipSharing" ) )
+        {
+            params.setSkipSharing( String.valueOf( parameters.get( "skipSharing" ) ).equals( "[true]" ) );
+            parameters.remove( "skipSharing" );
+        }
+
         for ( String parameterKey : parameters.keySet() )
         {
             String[] parameter = parameterKey.split( ":" );

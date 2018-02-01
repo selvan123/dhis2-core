@@ -35,18 +35,16 @@ import org.hisp.dhis.node.config.InclusionStrategy;
 import org.hisp.dhis.query.Query;
 import org.hisp.dhis.user.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class MetadataExportParams
 {
+
+    private static final List<String> SHARING_FIELDS = Arrays.asList(
+            "!user", "!publicAccess", "!userGroupAccesses", "!userAccesses" );
     /**
      * User to use for sharing filtering.
      */
@@ -91,6 +89,11 @@ public class MetadataExportParams
      * Inclusion strategy to use. There are a few already defined inclusions in the Inclusions enum.
      */
     private InclusionStrategy inclusionStrategy = InclusionStrategy.Include.NON_NULL;
+
+    /**
+     * Indicates whether sharing properties should be included in the export.
+     */
+    private boolean skipSharing;
 
     public MetadataExportParams()
     {
@@ -206,5 +209,14 @@ public class MetadataExportParams
     public void setInclusionStrategy( InclusionStrategy inclusionStrategy )
     {
         this.inclusionStrategy = inclusionStrategy;
+    }
+
+    public void setSkipSharing( boolean skipSharing )
+    {
+        this.skipSharing = skipSharing;
+        if ( skipSharing && !defaultFields.containsAll( SHARING_FIELDS ) )
+        {
+            defaultFields.addAll(SHARING_FIELDS);
+        }
     }
 }
