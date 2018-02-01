@@ -34,6 +34,7 @@ import org.hisp.dhis.fieldfilter.Defaults;
 import org.hisp.dhis.node.config.InclusionStrategy;
 import org.hisp.dhis.query.Query;
 import org.hisp.dhis.user.User;
+import sun.security.provider.SHA;
 
 import java.util.*;
 
@@ -45,6 +46,7 @@ public class MetadataExportParams
 
     private static final List<String> SHARING_FIELDS = Arrays.asList(
             "!user", "!publicAccess", "!userGroupAccesses", "!userAccesses" );
+
     /**
      * User to use for sharing filtering.
      */
@@ -149,7 +151,11 @@ public class MetadataExportParams
 
     public MetadataExportParams addFields( Class<? extends IdentifiableObject> klass, List<String> classFields )
     {
-        if ( !fields.containsKey( klass ) ) fields.put( klass, classFields );
+        if ( !fields.containsKey( klass ) )
+        {
+            fields.put( klass, classFields );
+            if ( skipSharing ) fields.get( klass ).addAll( SHARING_FIELDS );
+        }
 
         fields.get( klass ).addAll( classFields );
         return this;
@@ -216,7 +222,7 @@ public class MetadataExportParams
         this.skipSharing = skipSharing;
         if ( skipSharing && !defaultFields.containsAll( SHARING_FIELDS ) )
         {
-            defaultFields.addAll(SHARING_FIELDS);
+            defaultFields.addAll( SHARING_FIELDS );
         }
     }
 }
