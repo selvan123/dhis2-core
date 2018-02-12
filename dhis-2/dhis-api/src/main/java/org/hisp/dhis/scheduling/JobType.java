@@ -64,6 +64,7 @@ public enum JobType
         "predictors", "/api/predictors"
     ) ),
     DATA_SET_NOTIFICATION( "dataSetNotification", false, null, null ),
+    REMOVE_EXPIRED_RESERVED_VALUES( "removeExpiredReservedValues", false, null, null ),
     STARTUP( "startup", false, null, null ),
 
     // For tests

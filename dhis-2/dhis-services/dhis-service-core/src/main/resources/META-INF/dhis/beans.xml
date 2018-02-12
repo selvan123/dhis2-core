@@ -256,6 +256,10 @@
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
 
+  <bean id="removeExpiredReservedValues" class="org.hisp.dhis.reservedvalue.RemoveExpiredReservedValuesJob">
+    <property name="reservedValueStore" ref="org.hisp.dhis.reservedvalue.ReservedValueStore" />
+  </bean>
+
   <!--DataSetNotifications-->
 
   <bean id="org.hisp.dhis.dataset.notifications.DataSetNotificationTemplateStore" class="org.hisp.dhis.dataset.notifications.HibernateDataSetNotificationTemplateStore">
